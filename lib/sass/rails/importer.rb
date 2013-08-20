@@ -42,6 +42,20 @@ module Sprockets
         yield filename if File.directory?(filename) || context.asset_requirable?(filename)
       end
     end
+    
+    def mtime(name, options)
+      if name =~ GLOB && options[:filename]
+        mtime = nil
+        each_globbed_file(name, Pathname.new(options[:filename]), options) do |p|
+          if mtime.nil?
+            mtime = File.mtime(p)
+          else
+            mtime = [mtime, File.mtime(p)].max
+          end
+        end
+        mtime
+      end
+    end
 
     def glob_imports(glob, base_pathname, options)
       contents = ""
